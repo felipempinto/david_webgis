@@ -1,0 +1,6 @@
+
+- Basic filtering options
+- Basic measuring tools with the ability to select feet or meters as the units
+- Basic tools to select points using a polygon tool
+- Option to export selected point data as a CSV file
+- Option to import a new CSV dataset to the map (we may need a brief meeting to discuss limitations for this feature)

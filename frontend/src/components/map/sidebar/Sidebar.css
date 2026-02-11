@@ -1,0 +1,225 @@
+/* Sidebar.css */
+
+.sidebar {
+    width: 320px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    height: fit-content;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: box-shadow 0.2s ease;
+}
+
+.sidebar:hover {
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
+    border-bottom: 2px solid #eef2f6;
+    padding-bottom: 12px;
+}
+
+/* Dataset List */
+.dataset-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dataset-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+}
+
+.dataset-item:hover {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+    transform: translateY(-1px);
+}
+
+/* Custom checkbox */
+.dataset-item .checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-right: 12px;
+    position: relative;
+}
+
+.dataset-item input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.dataset-item .checkmark {
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    display: inline-block;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.dataset-item:hover .checkmark {
+    border-color: #94a3b8;
+}
+
+.dataset-item input[type="checkbox"]:checked~.checkmark {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.dataset-item .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.dataset-item input[type="checkbox"]:checked~.checkmark:after {
+    display: block;
+}
+
+/* Dataset name */
+.dataset-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #0f172a;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Empty state */
+.empty-datasets {
+    color: #64748b;
+    font-size: 0.9rem;
+    padding: 16px 12px;
+    text-align: center;
+    background: #f1f5f9;
+    border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+}
+
+/* Upload panel */
+.upload-panel {
+    margin-top: 8px;
+    border-top: 2px solid #eef2f6;
+    padding-top: 20px;
+}
+
+.upload-panel h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-panel h4:before {
+    content: "⬆️";
+    font-size: 1rem;
+}
+
+/* Hide default file input */
+.file-input {
+    display: none;
+}
+
+/* Styled upload button */
+.upload-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1e293b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 12px;
+}
+
+.upload-button:hover {
+    border-color: #4f46e5;
+    background: #f5f3ff;
+    color: #4f46e5;
+}
+
+.upload-button span {
+    font-size: 1.2rem;
+}
+
+/* Filename display */
+.file-name {
+    font-size: 0.85rem;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 8px 12px;
+    border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    max-width: 100%;
+    word-break: break-all;
+}
+
+.file-name span {
+    font-weight: 500;
+    color: #0f172a;
+}
+
+/* Upload success animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+    }
+}
+
+.upload-success {
+    animation: pulse 1s ease;
+}
