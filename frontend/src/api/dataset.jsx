@@ -1,7 +1,22 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const fetchDatasets = async () => {
-    const res = await fetch(`${API_URL}/datasets`);
+export const fetchUserDatasets = async (userId) => {
+    const res = await fetch(`${API_URL}/datasets/${userId}`);
+
+    if (!res.ok) {
+        throw new Error("Failed to list datasets");
+    }
+
+    const result = await res.json();
+
+    return result?.data?.datasets ?? [];
+};
+
+
+export const fetchDatasets = async (userId, datasetId) => {
+    const res = await fetch(
+        `${API_URL}/datasets/${userId}/${datasetId}`
+    );
 
     if (!res.ok) {
         throw new Error("Failed to load datasets");
@@ -15,11 +30,15 @@ export const fetchDatasets = async () => {
     })) ?? [];
 };
 
-export const uploadDataset = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
 
-    const res = await fetch(`${API_URL}/datasets/upload`, {
+export const uploadDataset = async (userId, files) => {
+    const formData = new FormData();
+
+    files.forEach(file => {
+        formData.append("files", file);
+    });
+
+    const res = await fetch(`${API_URL}/datasets/${userId}`, {
         method: "POST",
         body: formData
     });
@@ -28,18 +47,5 @@ export const uploadDataset = async (file) => {
         throw new Error("Upload failed");
     }
 
-    return await res.json();
+    return await res.json(); // retorna dataset_id
 };
-
-// const API_URL = import.meta.env.VITE_API_URL;
-
-// export const fetchDatasets = async () => {
-//     const res = await fetch(`${API_URL}/datasets`);
-
-//     if (!res.ok) {
-//         throw new Error("Failed to load datasets");
-//     }
-
-//     const result = await res.json();
-//     return result?.data?.layers ?? [];
-// };
