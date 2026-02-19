@@ -2,10 +2,15 @@ import DatasetList from "./DatasetList";
 import UploadPanel from "./UploadPanel";
 import "./Sidebar.css";
 
-const Sidebar = ({ datasets, setDatasets, userId, setDatasetId }) => {
+const Sidebar = ({
+    datasets,
+    setDatasets,
+    userId,
+    setAoiId
+}) => {
     return (
         <div className="sidebar">
-            <h3>Datasets</h3>
+            <h3>AOI Layers</h3>
 
             <DatasetList
                 datasets={datasets}
@@ -14,7 +19,7 @@ const Sidebar = ({ datasets, setDatasets, userId, setDatasetId }) => {
 
             <UploadPanel
                 userId={userId}
-                setDatasetId={setDatasetId}
+                setAoiId={setAoiId}
                 setDatasets={setDatasets}
             />
         </div>
@@ -22,19 +27,3 @@ const Sidebar = ({ datasets, setDatasets, userId, setDatasetId }) => {
 };
 
 export default Sidebar;
-
-// import DatasetList from "./DatasetList";
-// import UploadPanel from "./UploadPanel";
-// import "./Sidebar.css"; // <-- add this line
-
-// const Sidebar = ({ datasets, setDatasets }) => {
-//     return (
-//         <div className="sidebar">
-//             <h3>Datasets</h3>
-//             <DatasetList datasets={datasets} setDatasets={setDatasets} />
-//             <UploadPanel setDatasets={setDatasets} />
-//         </div>
-//     );
-// };
-
-// export default Sidebar;

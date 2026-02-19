@@ -8,11 +8,205 @@ import geopandas as gpd
 router = APIRouter()
 
 STORAGE_ROOT = "storage"
-# DATASET_PATH = "files"
-# AOI_SHP_PATH = os.path.join(DATASET_PATH, "AOI_Limit", "AOI_Limit.shp")
 
 CSV_CRS = "EPSG:2232"
 MAP_CRS = "EPSG:4326"
+
+
+############################### NEW ROUTES ###############################
+
+@router.post("/aois/{user_id}")
+async def create_aoi(
+    user_id: str,
+    aoi_file: list[UploadFile] = File(...),
+    extra_files: list[UploadFile] = File(default=[])
+):
+    if not aoi_file:
+        raise HTTPException(status_code=400, detail="AOI files required")
+
+    # 🔹 Validação extensões
+    required_ext = {".shp", ".dbf", ".shx"}
+    uploaded_ext = {
+        os.path.splitext(f.filename.lower())[1]
+        for f in aoi_file
+    }
+
+    if not required_ext.issubset(uploaded_ext):
+        raise HTTPException(
+            status_code=400,
+            detail="Shapefile must include .shp, .dbf and .shx"
+        )
+
+    aoi_id = str(uuid4())
+
+    aoi_path = os.path.join(
+        STORAGE_ROOT,
+        f"user_{user_id}",
+        f"aoi_{aoi_id}"
+    )
+
+    os.makedirs(aoi_path, exist_ok=True)
+
+    # 🔹 Salva arquivos AOI
+    for file in aoi_file:
+        file_path = os.path.join(aoi_path, file.filename)
+        with open(file_path, "wb") as buffer:
+            buffer.write(await file.read())
+
+    # 🔹 Valida leitura
+    shp_name = next(
+        f.filename for f in aoi_file
+        if f.filename.lower().endswith(".shp")
+    )
+
+    try:
+        gpd.read_file(os.path.join(aoi_path, shp_name))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid shapefile")
+
+    # 🔹 Salva extras
+    for file in extra_files:
+        file_path = os.path.join(aoi_path, file.filename)
+        with open(file_path, "wb") as buffer:
+            buffer.write(await file.read())
+
+    return {
+        "status": "success",
+        "aoi_id": aoi_id
+    }
+
+
+
+@router.get("/aois/{user_id}")
+def list_user_aois(user_id: str):
+
+    user_path = os.path.join(STORAGE_ROOT, f"user_{user_id}")
+
+    if not os.path.exists(user_path):
+        return {"status": "success", "data": {"aois": []}}
+
+    aois = []
+
+    for folder in os.listdir(user_path):
+        if folder.startswith("aoi_"):
+            aois.append(folder.replace("aoi_", ""))
+
+    return {
+        "status": "success",
+        "data": {
+            "aois": aois
+        }
+    }
+
+
+@router.post("/aois/{user_id}/{aoi_id}/extras")
+async def add_extra_files(
+    user_id: str,
+    aoi_id: str,
+    files: list[UploadFile] = File(...)
+):
+    aoi_path = os.path.join(
+        STORAGE_ROOT,
+        f"user_{user_id}",
+        f"aoi_{aoi_id}"
+    )
+
+    if not os.path.exists(aoi_path):
+        raise HTTPException(status_code=404, detail="AOI not found")
+
+    for file in files:
+        file_path = os.path.join(aoi_path, file.filename)
+        with open(file_path, "wb") as buffer:
+            buffer.write(await file.read())
+
+    return {"status": "success"}
+
+
+@router.delete("/aois/{user_id}/{aoi_id}/extras/{filename}")
+def delete_extra_file(user_id: str, aoi_id: str, filename: str):
+
+    if "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    aoi_path = os.path.join(
+        STORAGE_ROOT,
+        f"user_{user_id}",
+        f"aoi_{aoi_id}"
+    )
+
+    if not os.path.isdir(aoi_path):
+        raise HTTPException(status_code=404, detail="AOI not found")
+
+    file_path = os.path.join(aoi_path, filename)
+
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    if not filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV can be deleted")
+
+    os.remove(file_path)
+
+    return {"status": "deleted"}
+
+
+
+@router.get("/aois/{user_id}/{aoi_id}")
+def get_aoi_data(user_id: str, aoi_id: str):
+
+    aoi_path = os.path.join(
+        STORAGE_ROOT,
+        f"user_{user_id}",
+        f"aoi_{aoi_id}"
+    )
+
+    if not os.path.exists(aoi_path):
+        raise HTTPException(status_code=404, detail="AOI not found")
+
+    csv_files = list_files(aoi_path, ".csv")
+    shp_files = list_files(aoi_path, ".shp")
+
+    layers = []
+    errors = []
+
+    for csv in csv_files:
+        try:
+            geojson = csv_to_geojson(os.path.join(aoi_path, csv))
+
+            layers.append({
+                "name": csv,
+                "source": "csv",
+                "type": "point",
+                "geojson": geojson
+            })
+
+        except RuntimeError as e:
+            errors.append(str(e))
+
+    for shp in shp_files:
+        try:
+            gdf = gpd.read_file(os.path.join(aoi_path, shp))
+
+            if not gdf.empty:
+                layers.append({
+                    "name": shp,
+                    "source": "shapefile",
+                    "type": "polygon",
+                    "geojson": gdf.to_crs(MAP_CRS).__geo_interface__
+                })
+
+        except Exception as e:
+            errors.append(f"{shp}: {str(e)}")
+
+    return {
+        "status": "success",
+        "data": {
+            "layers": layers,
+            "errors": errors
+        }
+    }
+
+#########################################################################
 
 
 def list_csv_files(path: str):
@@ -128,73 +322,6 @@ def get_datasets(user_id: str, dataset_id: str):
             "errors": errors
         }
     }
-
-# @router.get("/datasets")
-# def get_datasets():
-#     try:
-#         csv_files = list_csv_files(DATASET_PATH)
-
-#         csv_layers = []
-#         csv_errors = []
-
-#         for csv in csv_files:
-#             path = os.path.join(DATASET_PATH, csv)
-
-#             try:
-#                 geojson = csv_to_geojson(path)
-
-#                 csv_layers.append({
-#                     "name": csv,
-#                     "source": "csv",
-#                     "type": "point",
-#                     "geojson": geojson
-#                 })
-
-#             except RuntimeError as e:
-#                 csv_errors.append(str(e))
-
-#         # AOI
-#         try:
-#             aoi_geojson = load_aoi_geojson(AOI_SHP_PATH)
-#         except RuntimeError as e:
-#             raise HTTPException(status_code=500, detail=str(e))
-
-#         return {
-#             "status": "success",
-#             "data": {
-#                 "layers": (
-#                     csv_layers +
-#                     ([
-#                         {
-#                             "name": "AOI_Limit",
-#                             "source": "shapefile",
-#                             "type": "aoi",
-#                             "geojson": aoi_geojson
-#                         }
-#                     ] if aoi_geojson else [])
-#                 ),
-#                 "errors": csv_errors
-#             },
-#             "error": None
-#         }
-
-#     except HTTPException:
-#         raise
-
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=500,
-#             detail={
-#                 "status": "error",
-#                 "data": None,
-#                 "error": {
-#                     "code": "DATASET_PROCESSING_FAILED",
-#                     "message": str(e)
-#                 }
-#             }
-#         )
-
-
 
 
 @router.post("/datasets/{user_id}")

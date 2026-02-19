@@ -1,27 +1,42 @@
 import { useEffect, useState } from "react";
-import { fetchDatasets, fetchUserDatasets } from "../api/dataset";
+import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
 import Sidebar from "../components/map/sidebar/Sidebar";
 import MapContainer from "../components/map/MapContainer";
 
-const FAKE_USER_ID = "admin"; // temporário
+const FAKE_USER_ID = "admin";
 
 const MapPage = () => {
     const [datasets, setDatasets] = useState([]);
-    const [datasetId, setDatasetId] = useState(null);
 
     useEffect(() => {
         const load = async () => {
-            const datasetIds = await fetchUserDatasets(FAKE_USER_ID);
+            try {
+                const aoiIds = await fetchUserAOIs(FAKE_USER_ID);
 
-            let allLayers = [];
+                const allAOIs = [];
 
-            for (const datasetId of datasetIds) {
-                const layers = await fetchDatasets(FAKE_USER_ID, datasetId);
-                allLayers = [...allLayers, ...layers];
+                for (const aoiId of aoiIds) {
+                    const layers = await fetchAOIData(
+                        FAKE_USER_ID,
+                        aoiId
+                    );
+
+                    allAOIs.push({
+                        aoiId,
+                        layers: layers.map(layer => ({
+                            ...layer,
+                            visible: true
+                        }))
+                    });
+                }
+
+                setDatasets(allAOIs);
+
+            } catch (err) {
+                console.error("Failed to load AOIs", err);
             }
-
-            setDatasets(allLayers);
         };
+
         load();
     }, []);
 
@@ -30,7 +45,6 @@ const MapPage = () => {
             <Sidebar
                 datasets={datasets}
                 setDatasets={setDatasets}
-                setDatasetId={setDatasetId}
                 userId={FAKE_USER_ID}
             />
             <MapContainer datasets={datasets} />
