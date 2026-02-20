@@ -1,4 +1,45 @@
-const DatasetList = ({ datasets, setDatasets }) => {
+import { useState } from "react";
+import {
+    addAOIExtras,
+    fetchAOIData,
+    deleteAOIExtra
+} from "../../../api/aoi";
+
+
+const DatasetList = ({ datasets, setDatasets, userId }) => {
+
+    const [uploadingFor, setUploadingFor] = useState(null);
+
+    const handleAddCSV = async (userId, aoiId, files) => {
+        try {
+            setUploadingFor(aoiId);
+
+            await addAOIExtras(userId, aoiId, files);
+
+            const result = await fetchAOIData(userId, aoiId);
+
+            const updatedLayers = result.map(layer => ({
+                ...layer,
+                visible: true
+            }));
+
+            setDatasets(prev =>
+                prev.map(aoi =>
+                    aoi.aoiId === aoiId
+                        ? {
+                            ...aoi,
+                            layers: updatedLayers
+                        }
+                        : aoi
+                )
+            );
+
+        } catch (err) {
+            console.error("CSV upload failed", err);
+        } finally {
+            setUploadingFor(null);
+        }
+    };
 
     const toggleVisibility = (aoiId, layerName) => {
         setDatasets(prev =>
@@ -19,18 +60,15 @@ const DatasetList = ({ datasets, setDatasets }) => {
 
     const deleteLayer = async (aoiId, filename) => {
         try {
-            await fetch(`/aois/${aoiId}/extras/${filename}`, {
-                method: "DELETE"
-            });
+            await deleteAOIExtra(userId, aoiId, filename);
+            const updatedLayers = await fetchAOIData(userId, aoiId);
 
             setDatasets(prev =>
                 prev.map(aoi =>
                     aoi.aoiId === aoiId
                         ? {
                             ...aoi,
-                            layers: aoi.layers.filter(
-                                l => l.name !== filename
-                            )
+                            layers: updatedLayers
                         }
                         : aoi
                 )
@@ -68,8 +106,45 @@ const DatasetList = ({ datasets, setDatasets }) => {
                         <div className="aoi-title">
                             📦 AOI {aoi.aoiId}
                         </div>
+                        <button
+                            className="delete-aoi-btn"
+                            // disabled={!canDeleteAOI}
+                            // onClick={() => handleDeleteAOI(aoi.aoiId)}
+                        >
+                            🗑 Delete AOI
+                        </button>
+                        <div className="add-csv-section">
 
-                        {/* Shapefile base */}
+                            <input
+                                type="file"
+                                multiple
+                                accept=".csv"
+                                id={`csv-input-${aoi.aoiId}`}
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                    const files = [...e.target.files];
+                                    if (!files.length) return;
+
+                                    handleAddCSV(userId, aoi.aoiId, files);
+                                }}
+                            />
+
+                            <button
+                                className="add-csv-btn"
+                                disabled={uploadingFor === aoi.aoiId}
+                                onClick={() =>
+                                    document
+                                        .getElementById(`csv-input-${aoi.aoiId}`)
+                                        .click()
+                                }
+                            >
+                                {uploadingFor === aoi.aoiId
+                                    ? "Uploading..."
+                                    : "+ Add CSV"}
+                            </button>
+
+                        </div>
+
                         {shapefile && (
                             <div className="dataset-item">
                                 <input

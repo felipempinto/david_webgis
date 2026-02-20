@@ -6,7 +6,6 @@ const Sidebar = ({
     datasets,
     setDatasets,
     userId,
-    setAoiId
 }) => {
     return (
         <div className="sidebar">
@@ -15,11 +14,11 @@ const Sidebar = ({
             <DatasetList
                 datasets={datasets}
                 setDatasets={setDatasets}
+                userId={userId}
             />
 
             <UploadPanel
                 userId={userId}
-                setAoiId={setAoiId}
                 setDatasets={setDatasets}
             />
         </div>

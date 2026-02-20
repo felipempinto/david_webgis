@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { createAOI, fetchAOIData } from "../../../api/aoi";
 
-const UploadPanel = ({ userId, setAoiId, setDatasets }) => {
+const UploadPanel = ({ userId, setDatasets }) => {
     const [showForm, setShowForm] = useState(false);
     const [aoiFiles, setAoiFiles] = useState([]);
     const [extraFiles, setExtraFiles] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
     const [success, setSuccess] = useState(false);
+    
 
     const resetForm = () => {
         setAoiFiles([]);
@@ -42,8 +43,6 @@ const UploadPanel = ({ userId, setAoiId, setDatasets }) => {
             const result = await createAOI(userId, aoiFiles, extraFiles);
             const newAoiId = result.aoi_id;
 
-            setAoiId(newAoiId);
-
             const response = await fetchAOIData(userId, newAoiId);
 
             const layersWithVisibility = response.map(layer => ({
@@ -51,7 +50,6 @@ const UploadPanel = ({ userId, setAoiId, setDatasets }) => {
                 visible: true
             }));
 
-            // 🔥 IMPORTANTE: acumular AOIs
             setDatasets(prev => [
                 ...prev,
                 {
