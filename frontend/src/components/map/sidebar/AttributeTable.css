@@ -1,0 +1,91 @@
+.attribute-table-container {
+    position: absolute;
+    bottom: 0;
+    left: 320px; /* mesma largura da sidebar */
+    right: 0;
+    height: 45%;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
+    animation: slideUp 0.2s ease;
+    z-index: 20;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* HEADER */
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef2f6;
+    background: #f8fafc;
+}
+
+.table-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* BOTÃO CLOSE BONITO */
+.table-close-btn {
+    background: #fee2e2;
+    border: none;
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.table-close-btn:hover {
+    background: #dc2626;
+    color: white;
+}
+
+/* TABLE WRAPPER */
+.table-wrapper {
+    overflow: auto;
+    flex: 1;
+}
+
+/* TABLE */
+.attribute-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.attribute-table th,
+.attribute-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.attribute-table thead {
+    background: #f1f5f9;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.attribute-table th {
+    font-weight: 600;
+    color: #334155;
+}
+
+.attribute-table tbody tr:hover {
+    background: #f8fafc;
+}

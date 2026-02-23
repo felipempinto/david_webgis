@@ -6,6 +6,7 @@ const Sidebar = ({
     datasets,
     setDatasets,
     userId,
+    setSelectedTable
 }) => {
     return (
         <div className="sidebar">
@@ -15,6 +16,7 @@ const Sidebar = ({
                 datasets={datasets}
                 setDatasets={setDatasets}
                 userId={userId}
+                setSelectedTable={setSelectedTable}
             />
 
             <UploadPanel

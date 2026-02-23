@@ -113,7 +113,7 @@ export const deleteAOIExtra = async (userId, aoiId, filename) => {
 };
 
 
-const handleDeleteAOI = async (aoiId) => {
+export const handleDeleteAOI = async (userId,aoiId,setDatasets) => {
     try {
         await fetch(`${API_URL}/aois/${userId}/${aoiId}`, {
             method: "DELETE"
@@ -124,6 +124,7 @@ const handleDeleteAOI = async (aoiId) => {
         );
 
     } catch (err) {
-        alert("Cannot delete AOI with CSV files attached");
+        //TODO: tratar os erros aqui
+        alert(err);
     }
 };

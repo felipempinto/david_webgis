@@ -473,3 +473,28 @@
 .delete-btn:hover {
     opacity: 1;
 }
+
+
+
+/* ============================= */
+/* TABLE BUTTON */
+/* ============================= */
+
+.table-btn {
+    background: #e0f2fe;
+    border: none;
+    color: #0369a1;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.85;
+}
+
+.table-btn:hover {
+    background: #0284c7;
+    color: white;
+    transform: scale(1.05);
+    opacity: 1;
+}

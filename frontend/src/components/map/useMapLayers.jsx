@@ -9,22 +9,30 @@ export const useMapLayers = (map, isLoaded, datasets) => {
 
         const bounds = new maplibregl.LngLatBounds();
 
+        const activeLayerIds = new Set();
+        const activeSourceIds = new Set();
+
         datasets.forEach(aoi => {
 
             aoi.layers.forEach(layer => {
-                console.log(layer)
 
                 const sourceId = `source-${aoi.aoiId}-${layer.name}`;
                 const layerId = `layer-${aoi.aoiId}-${layer.name}`;
+                const outlineId = `${layerId}-outline`;
+
+                activeSourceIds.add(sourceId);
+                activeLayerIds.add(layerId);
+
+                if (layer.type === "polygon") {
+                    activeLayerIds.add(outlineId);
+                }
 
                 if (!map.getSource(sourceId)) {
-
                     map.addSource(sourceId, {
                         type: "geojson",
                         data: layer.geojson
                     });
 
-                    // 🔵 POINT
                     if (layer.type === "point") {
                         map.addLayer({
                             id: layerId,
@@ -42,9 +50,7 @@ export const useMapLayers = (map, isLoaded, datasets) => {
                         });
                     }
 
-                    // 🔴 AOI
                     if (layer.type === "polygon") {
-                        console.log("AOI")
 
                         map.addLayer({
                             id: layerId,
@@ -60,7 +66,7 @@ export const useMapLayers = (map, isLoaded, datasets) => {
                         });
 
                         map.addLayer({
-                            id: `${layerId}-outline`,
+                            id: outlineId,
                             type: "line",
                             source: sourceId,
                             paint: {
@@ -72,9 +78,14 @@ export const useMapLayers = (map, isLoaded, datasets) => {
                             }
                         });
                     }
+
+                } else {
+                    const source = map.getSource(sourceId);
+                    if (source && source.setData) {
+                        source.setData(layer.geojson);
+                    }
                 }
 
-                // 🔄 Atualiza visibilidade
                 if (map.getLayer(layerId)) {
                     map.setLayoutProperty(
                         layerId,
@@ -83,9 +94,9 @@ export const useMapLayers = (map, isLoaded, datasets) => {
                     );
                 }
 
-                if (map.getLayer(`${layerId}-outline`)) {
+                if (map.getLayer(outlineId)) {
                     map.setLayoutProperty(
-                        `${layerId}-outline`,
+                        outlineId,
                         "visibility",
                         layer.visible ? "visible" : "none"
                     );
@@ -96,13 +107,39 @@ export const useMapLayers = (map, isLoaded, datasets) => {
                 }
 
             });
+        });
 
+        const style = map.getStyle();
+        if (style && style.layers) {
+            style.layers.forEach(styleLayer => {
+                const id = styleLayer.id;
+
+                if (
+                    id.startsWith("layer-") &&
+                    !activeLayerIds.has(id)
+                ) {
+                    if (map.getLayer(id)) {
+                        map.removeLayer(id);
+                    }
+                }
+            });
+        }
+
+        Object.keys(map.getStyle().sources).forEach(sourceId => {
+            if (
+                sourceId.startsWith("source-") &&
+                !activeSourceIds.has(sourceId)
+            ) {
+                if (map.getSource(sourceId)) {
+                    map.removeSource(sourceId);
+                }
+            }
         });
 
         if (!bounds.isEmpty()) {
             map.fitBounds(bounds, {
                 padding: 40,
-                duration: 1000
+                duration: 800
             });
         }
 

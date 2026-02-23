@@ -2,11 +2,12 @@ import { useState } from "react";
 import {
     addAOIExtras,
     fetchAOIData,
-    deleteAOIExtra
+    deleteAOIExtra,
+    handleDeleteAOI
 } from "../../../api/aoi";
 
 
-const DatasetList = ({ datasets, setDatasets, userId }) => {
+const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
 
     const [uploadingFor, setUploadingFor] = useState(null);
 
@@ -109,7 +110,7 @@ const DatasetList = ({ datasets, setDatasets, userId }) => {
                         <button
                             className="delete-aoi-btn"
                             // disabled={!canDeleteAOI}
-                            // onClick={() => handleDeleteAOI(aoi.aoiId)}
+                            onClick={() => handleDeleteAOI(userId, aoi.aoiId, setDatasets)}
                         >
                             🗑 Delete AOI
                         </button>
@@ -190,6 +191,15 @@ const DatasetList = ({ datasets, setDatasets, userId }) => {
                                 >
                                     📍 {csv.name}
                                 </span>
+
+                                {/* 🔥 BOTÃO TABELA AQUI */}
+                                <button
+                                    className="table-btn"
+                                    onClick={() => setSelectedTable(csv)}
+                                    title="View attributes"
+                                >
+                                    📊
+                                </button>
 
                                 <button
                                     className="delete-btn"

@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
 import Sidebar from "../components/map/sidebar/Sidebar";
 import MapContainer from "../components/map/MapContainer";
+import AttributeTable from "../components/map/sidebar/AttributeTable";
 
 const FAKE_USER_ID = "admin";
 
 const MapPage = () => {
     const [datasets, setDatasets] = useState([]);
+    const [selectedTable, setSelectedTable] = useState(null);
 
     useEffect(() => {
         const load = async () => {
@@ -46,7 +48,14 @@ const MapPage = () => {
                 datasets={datasets}
                 setDatasets={setDatasets}
                 userId={FAKE_USER_ID}
+                setSelectedTable={setSelectedTable}
             />
+            {selectedTable && (
+                <AttributeTable
+                    layer={selectedTable}
+                    onClose={() => setSelectedTable(null)}
+                />
+            )}
             <MapContainer datasets={datasets} />
         </div>
     );

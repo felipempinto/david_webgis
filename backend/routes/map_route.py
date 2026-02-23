@@ -199,6 +199,26 @@ def delete_extra_file(user_id: str, aoi_id: str, filename: str):
     return {"status": "deleted"}
 
 
+@router.delete("/aois/{user_id}/{aoi_id}")
+def delete_aoi(user_id:str,aoi_id:str):
+    aoi_path = os.path.join(
+        STORAGE_ROOT,
+        f"user_{user_id}",
+        f"aoi_{aoi_id}"
+    )
+
+    if not os.path.exists(aoi_path):
+        raise HTTPException(status_code=404, detail="AOI not found")
+
+    for file in os.listdir(aoi_path):
+        os.remove(os.path.join(aoi_path,file))
+
+
+    os.rmdir(aoi_path)
+    
+    return {"status": "deleted"}
+    
+
 
 @router.get("/aois/{user_id}/{aoi_id}")
 def get_aoi_data(user_id: str, aoi_id: str):
