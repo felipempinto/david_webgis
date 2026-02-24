@@ -1,7 +1,7 @@
 .attribute-table-container {
     position: absolute;
     bottom: 0;
-    left: 320px; /* mesma largura da sidebar */
+    left: 320px;
     right: 0;
     height: 45%;
     background: #ffffff;
@@ -18,7 +18,6 @@
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* HEADER */
 .table-header {
     display: flex;
     align-items: center;
@@ -35,7 +34,6 @@
     margin: 0;
 }
 
-/* BOTÃO CLOSE BONITO */
 .table-close-btn {
     background: #fee2e2;
     border: none;
@@ -53,13 +51,11 @@
     color: white;
 }
 
-/* TABLE WRAPPER */
 .table-wrapper {
     overflow: auto;
     flex: 1;
 }
 
-/* TABLE */
 .attribute-table {
     width: 100%;
     border-collapse: collapse;

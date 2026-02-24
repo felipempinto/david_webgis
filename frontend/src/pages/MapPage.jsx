@@ -3,7 +3,7 @@ import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
 import Sidebar from "../components/map/sidebar/Sidebar";
 import MapContainer from "../components/map/MapContainer";
 import AttributeTable from "../components/map/sidebar/AttributeTable";
-
+import "./MapPage.css"
 const FAKE_USER_ID = "admin";
 
 const MapPage = () => {
@@ -43,20 +43,21 @@ const MapPage = () => {
     }, []);
 
     return (
-        <div style={{ display: "flex", height: "100vh" }}>
+        <div className="app-layout">
             <Sidebar
                 datasets={datasets}
                 setDatasets={setDatasets}
                 userId={FAKE_USER_ID}
                 setSelectedTable={setSelectedTable}
             />
+            <MapContainer datasets={datasets} />
             {selectedTable && (
                 <AttributeTable
                     layer={selectedTable}
                     onClose={() => setSelectedTable(null)}
                 />
             )}
-            <MapContainer datasets={datasets} />
+            
         </div>
     );
 };

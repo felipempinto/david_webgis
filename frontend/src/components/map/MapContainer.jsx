@@ -7,12 +7,14 @@ const MapContainer = ({ datasets }) => {
     const { map, isLoaded } = useMapInstance(containerRef);
 
     return (
-        <MapView
-            map={map}
-            isLoaded={isLoaded}
-            datasets={datasets}
-            containerRef={containerRef}
-        />
+        <div className="map-container">
+            <MapView
+                map={map}
+                isLoaded={isLoaded}
+                datasets={datasets}
+                containerRef={containerRef}
+            />
+        </div>
     );
 };
 
