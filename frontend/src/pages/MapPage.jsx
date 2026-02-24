@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
 import Sidebar from "../components/map/sidebar/Sidebar";
 import MapContainer from "../components/map/MapContainer";
-import AttributeTable from "../components/map/sidebar/AttributeTable";
 import "./MapPage.css"
 const FAKE_USER_ID = "admin";
 
@@ -50,13 +49,11 @@ const MapPage = () => {
                 userId={FAKE_USER_ID}
                 setSelectedTable={setSelectedTable}
             />
-            <MapContainer datasets={datasets} />
-            {selectedTable && (
-                <AttributeTable
-                    layer={selectedTable}
-                    onClose={() => setSelectedTable(null)}
-                />
-            )}
+            <MapContainer
+                datasets={datasets}
+                selectedTable={selectedTable}
+                setSelectedTable={setSelectedTable}
+            />
             
         </div>
     );

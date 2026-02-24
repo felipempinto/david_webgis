@@ -1,13 +1,29 @@
 import "./AttributeTable.css";
 
-const AttributeTable = ({ layer, onClose }) => {
+const AttributeTable = ({ layer, map, onClose }) => {
 
-    if (!layer?.geojson?.features?.length) {
+    if (!layer?.geojson?.features?.length || !map) {
         return null;
     }
 
     const features = layer.geojson.features;
     const columns = Object.keys(features[0].properties);
+
+    const sourceId = `source-${layer.aoiId}-${layer.name}`;
+
+    const handleMouseEnter = (featureId) => {
+        map.setFeatureState(
+            { source: sourceId, id: featureId },
+            { hover: true }
+        );
+    };
+
+    const handleMouseLeave = (featureId) => {
+        map.setFeatureState(
+            { source: sourceId, id: featureId },
+            { hover: false }
+        );
+    };
 
     return (
         <div className="attribute-table-container">
@@ -32,8 +48,12 @@ const AttributeTable = ({ layer, onClose }) => {
                     </thead>
 
                     <tbody>
-                        {features.map((feature, i) => (
-                            <tr key={i}>
+                        {features.map((feature) => (
+                            <tr
+                                key={feature.id}
+                                onMouseEnter={() => handleMouseEnter(feature.id)}
+                                onMouseLeave={() => handleMouseLeave(feature.id)}
+                            >
                                 {columns.map(col => (
                                     <td key={col}>
                                         {String(feature.properties[col] ?? "")}
@@ -42,6 +62,7 @@ const AttributeTable = ({ layer, onClose }) => {
                             </tr>
                         ))}
                     </tbody>
+
                 </table>
             </div>
         </div>

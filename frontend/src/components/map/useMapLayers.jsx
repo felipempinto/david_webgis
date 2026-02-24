@@ -39,8 +39,20 @@ export const useMapLayers = (map, isLoaded, datasets) => {
                             type: "circle",
                             source: sourceId,
                             paint: {
-                                "circle-radius": 5,
-                                "circle-color": "#007cbf",
+                                // "circle-radius": 5,
+                                "circle-radius": [
+                                    "case",
+                                    ["boolean", ["feature-state", "hover"], false],
+                                    8,
+                                    5
+                                ],
+                                // "circle-color": "#007cbf",
+                                "circle-color": [
+                                    "case",
+                                    ["boolean", ["feature-state", "hover"], false],
+                                    "#ff0000",   // cor quando hover
+                                    "#007cbf"    // cor normal
+                                ],
                                 "circle-stroke-width": 1,
                                 "circle-stroke-color": "#ffffff"
                             },

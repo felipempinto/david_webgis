@@ -192,10 +192,14 @@ const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
                                     📍 {csv.name}
                                 </span>
 
-                                {/* 🔥 BOTÃO TABELA AQUI */}
                                 <button
                                     className="table-btn"
-                                    onClick={() => setSelectedTable(csv)}
+                                    onClick={() =>
+                                        setSelectedTable({
+                                            ...csv,
+                                            aoiId: aoi.aoiId
+                                        })
+                                    }
                                     title="View attributes"
                                 >
                                     📊
