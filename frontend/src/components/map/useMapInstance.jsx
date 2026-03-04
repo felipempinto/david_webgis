@@ -1,19 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 
 export const useMapInstance = (containerRef) => {
-    const [map, setMap] = useState(null);
+    const mapRef = useRef(null);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         if (!containerRef.current) return;
 
-        // const mapInstance = new maplibregl.Map({
-        //     container: containerRef.current,
-        //     style: "https://demotiles.maplibre.org/style.json",
-        //     center: [0, 0],
-        //     zoom: 2
-        // });
+        if (mapRef.current) return;
+
         const mapInstance = new maplibregl.Map({
             container: containerRef.current,
             style: {
@@ -39,14 +35,22 @@ export const useMapInstance = (containerRef) => {
             zoom: 5
         });
 
+        mapRef.current = mapInstance;
+
         mapInstance.on("load", () => {
             setIsLoaded(true);
+
+            requestAnimationFrame(() => {
+                mapInstance.resize();
+            });
         });
 
-        setMap(mapInstance);
+        return () => {
+            mapInstance.remove();
+            mapRef.current = null;
+        };
 
-        return () => mapInstance.remove();
     }, [containerRef]);
 
-    return { map, isLoaded };
+    return { map: mapRef.current, isLoaded };
 };

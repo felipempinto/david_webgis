@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
-import Sidebar from "../components/map/sidebar/Sidebar";
 import MapContainer from "../components/map/MapContainer";
 import "./MapPage.css"
 const FAKE_USER_ID = "admin";
@@ -43,18 +42,14 @@ const MapPage = () => {
 
     return (
         <div className="app-layout">
-            <Sidebar
-                datasets={datasets}
-                setDatasets={setDatasets}
-                userId={FAKE_USER_ID}
-                setSelectedTable={setSelectedTable}
-            />
             <MapContainer
                 datasets={datasets}
+                setDatasets={setDatasets}
                 selectedTable={selectedTable}
                 setSelectedTable={setSelectedTable}
+                userId={FAKE_USER_ID}
             />
-            
+
         </div>
     );
 };

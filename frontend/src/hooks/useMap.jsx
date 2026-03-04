@@ -33,7 +33,7 @@ export const useMap = (
             map.remove();
             mapRef.current = null;
         };
-    }, [containerRef, style,  zoom]);
+    }, [containerRef, style]);
 
     return {
         map: mapRef.current,

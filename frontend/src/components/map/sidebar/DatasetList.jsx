@@ -92,6 +92,8 @@ const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
         <div className="dataset-list">
 
             {datasets.map(aoi => {
+                console.log(aoi)
+
 
                 const shapefile = aoi.layers.find(
                     l => l.source === "shapefile"
@@ -148,16 +150,19 @@ const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
 
                         {shapefile && (
                             <div className="dataset-item">
-                                <input
-                                    type="checkbox"
-                                    checked={shapefile.visible}
-                                    onChange={() =>
-                                        toggleVisibility(
-                                            aoi.aoiId,
-                                            shapefile.name
-                                        )
-                                    }
-                                />
+                                <label className="checkbox-container">
+                                    <input
+                                        type="checkbox"
+                                        checked={shapefile.visible}
+                                        onChange={() =>
+                                            toggleVisibility(
+                                                aoi.aoiId,
+                                                shapefile.name
+                                            )
+                                        }
+                                    />
+                                    <span className="checkmark"></span>
+                                </label>
 
                                 <span
                                     className="dataset-name aoi-layer"
@@ -168,22 +173,24 @@ const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
                             </div>
                         )}
 
-                        {/* CSVs associados */}
                         {csvLayers.map(csv => (
                             <div
                                 key={csv.name}
                                 className="dataset-item csv-item"
                             >
-                                <input
-                                    type="checkbox"
-                                    checked={csv.visible}
-                                    onChange={() =>
-                                        toggleVisibility(
-                                            aoi.aoiId,
-                                            csv.name
-                                        )
-                                    }
-                                />
+                                <label className="checkbox-container">
+                                    <input
+                                        type="checkbox"
+                                        checked={csv.visible}
+                                        onChange={() =>
+                                            toggleVisibility(
+                                                aoi.aoiId,
+                                                csv.name
+                                            )
+                                        }
+                                    />
+                                    <span className="checkmark"></span>
+                                </label>
 
                                 <span
                                     className="dataset-name csv-layer"
