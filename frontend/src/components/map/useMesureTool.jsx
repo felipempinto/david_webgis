@@ -2,6 +2,13 @@ import { useEffect, useRef } from "react";
 import * as turf from "@turf/turf";
 import maplibregl from "maplibre-gl";
 
+
+
+// TODO:
+// https://maplibre.org/maplibre-gl-js/docs/examples/measure-distances/
+// https://github.com/jdsantos/maplibre-gl-measures
+
+
 export const useMeasureTool = (map, isLoaded, measureMode) => {
 
     const pointsRef = useRef([]);
@@ -96,8 +103,8 @@ export const useMeasureTool = (map, isLoaded, measureMode) => {
 
             <b>${length.toFixed(2)} km</b>
             `
-            // const location = pointsRef.current[pointsRef.current.length - 1]
-            const location = e.lngLat;
+            const location = pointsRef.current[pointsRef.current.length - 1]
+            // const location = e.lngLat;
             popupRef.current = new maplibregl.Popup()
                 //console.log()
                 .setLngLat(location)
