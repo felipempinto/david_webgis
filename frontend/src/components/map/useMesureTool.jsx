@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import * as turf from "@turf/turf";
 import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
-
-
-// TODO:
 // https://maplibre.org/maplibre-gl-js/docs/examples/measure-distances/
 // https://github.com/jdsantos/maplibre-gl-measures
+// Problem solved thanks to this guys <3:
+// https://github.com/visgl/deck.gl/discussions/9132
 
 
 export const useMeasureTool = (map, isLoaded, measureMode) => {
