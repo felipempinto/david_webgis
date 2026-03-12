@@ -16,9 +16,7 @@ const MapContainer = ({
 }) => {
     const containerRef = useRef(null);
     const { map, isLoaded } = useMapInstance(containerRef);
-
     const [measureMode, setMeasureMode] = useState(false);
-
     const { clearMeasure } = useMeasureTool(map, isLoaded, measureMode);
 
     return (

@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-from routes import map_route
-from routes import auth, protected
+from routes import auth, protected, map_route, project
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,3 +23,4 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(protected.router)
 app.include_router(map_route.router)
+app.include_router(project.router)

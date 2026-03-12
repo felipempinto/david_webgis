@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException
-from fastapi import UploadFile, File, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from uuid import uuid4
 import os
 import pandas as pd
@@ -11,8 +10,6 @@ STORAGE_ROOT = "storage"
 
 CSV_CRS = "EPSG:2232"
 MAP_CRS = "EPSG:4326"
-
-
 
 def csv_to_geojson(csv_path: str):
     try:
@@ -34,8 +31,6 @@ def csv_to_geojson(csv_path: str):
     except Exception as e:
         raise RuntimeError(f"{os.path.basename(csv_path)}: {str(e)}")
 
-
-
 def list_files(path: str, extension: str):
     if not os.path.exists(path):
         return []
@@ -45,9 +40,7 @@ def list_files(path: str, extension: str):
         if f.lower().endswith(extension)
     ]
 
-
 ############################### NEW ROUTES ###############################
-
 @router.post("/aois/{user_id}")
 async def create_aoi(
     user_id: str,
@@ -80,13 +73,11 @@ async def create_aoi(
 
     os.makedirs(aoi_path, exist_ok=True)
 
-    # 🔹 Salva arquivos AOI
     for file in aoi_file:
         file_path = os.path.join(aoi_path, file.filename)
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
 
-    # 🔹 Valida leitura
     shp_name = next(
         f.filename for f in aoi_file
         if f.filename.lower().endswith(".shp")
@@ -97,7 +88,6 @@ async def create_aoi(
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid shapefile")
 
-    # 🔹 Salva extras
     for file in extra_files:
         file_path = os.path.join(aoi_path, file.filename)
         with open(file_path, "wb") as buffer:
@@ -107,8 +97,6 @@ async def create_aoi(
         "status": "success",
         "aoi_id": aoi_id
     }
-
-
 
 @router.get("/aois/{user_id}")
 def list_user_aois(user_id: str):
@@ -130,7 +118,6 @@ def list_user_aois(user_id: str):
             "aois": aois
         }
     }
-
 
 @router.post("/aois/{user_id}/{aoi_id}/extras")
 async def add_extra_files(
@@ -170,7 +157,6 @@ async def add_extra_files(
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail="File unreadable")
 
-
 @router.delete("/aois/{user_id}/{aoi_id}/extras/{filename}")
 def delete_extra_file(user_id: str, aoi_id: str, filename: str):
 
@@ -198,7 +184,6 @@ def delete_extra_file(user_id: str, aoi_id: str, filename: str):
 
     return {"status": "deleted"}
 
-
 @router.delete("/aois/{user_id}/{aoi_id}")
 def delete_aoi(user_id:str,aoi_id:str):
     aoi_path = os.path.join(
@@ -218,8 +203,6 @@ def delete_aoi(user_id:str,aoi_id:str):
     
     return {"status": "deleted"}
     
-
-
 @router.get("/aois/{user_id}/{aoi_id}")
 def get_aoi_data(user_id: str, aoi_id: str):
 

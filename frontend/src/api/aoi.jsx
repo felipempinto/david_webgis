@@ -5,7 +5,8 @@ const API_URL = import.meta.env.VITE_API_URL;
     LISTAR AOIs DO USUÁRIO
 ========================= */
 export const fetchUserAOIs = async (userId) => {
-    const res = await fetch(`${API_URL}/aois/${userId}`);
+    // const res = await fetch(`${API_URL}/aois/${userId}`);
+    const res = await fetch(`${API_URL}/projects/${userId}`);
 
     if (!res.ok) {
         throw new Error("Failed to list AOIs");
@@ -13,7 +14,7 @@ export const fetchUserAOIs = async (userId) => {
 
     const result = await res.json();
 
-    return result?.data?.aois ?? [];
+    return result?.data?.projects ?? [];
 };
 
 
@@ -22,7 +23,8 @@ export const fetchUserAOIs = async (userId) => {
 ========================= */
 export const fetchAOIData = async (userId, aoiId) => {
     const res = await fetch(
-        `${API_URL}/aois/${userId}/${aoiId}`
+        `${API_URL}/projects/${userId}/${aoiId}`
+        // `${API_URL}/projects/${userId}/${aoiId}`
     );
 
     if (!res.ok) {

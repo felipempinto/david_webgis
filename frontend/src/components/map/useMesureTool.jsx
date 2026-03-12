@@ -3,12 +3,6 @@ import * as turf from "@turf/turf";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-// https://maplibre.org/maplibre-gl-js/docs/examples/measure-distances/
-// https://github.com/jdsantos/maplibre-gl-measures
-// Problem solved thanks to this guys <3:
-// https://github.com/visgl/deck.gl/discussions/9132
-
-
 export const useMeasureTool = (map, isLoaded, measureMode) => {
 
     const pointsRef = useRef([]);
@@ -27,7 +21,6 @@ export const useMeasureTool = (map, isLoaded, measureMode) => {
                 }
             });
 
-            // pontos
             map.addLayer({
                 id: "measure-points",
                 type: "circle",
@@ -39,7 +32,6 @@ export const useMeasureTool = (map, isLoaded, measureMode) => {
                 filter: ["==", "$type", "Point"]
             });
 
-            // linha
             map.addLayer({
                 id: "measure-line",
                 type: "line",
@@ -62,9 +54,8 @@ export const useMeasureTool = (map, isLoaded, measureMode) => {
 
             const coords = [e.lngLat.lng, e.lngLat.lat];
             pointsRef.current.push(coords);
-            console.log("coords",coords)
 
-            updateMeasure(e);
+            updateMeasure();
         };
 
         map.on("click", handleClick);
@@ -73,7 +64,7 @@ export const useMeasureTool = (map, isLoaded, measureMode) => {
 
     }, [map, isLoaded, measureMode]);
 
-    const updateMeasure = (e) => {
+    const updateMeasure = () => {
 
         const features = [];
 
@@ -96,17 +87,34 @@ export const useMeasureTool = (map, isLoaded, measureMode) => {
                 geometry: line.geometry
             });
 
-            const length = turf.length(line, { units: "kilometers" });
+            const lengthKm = turf.length(line, { units: "kilometers" });
+            const lengthMiles = turf.length(line, { units: "miles" });
+            const lengthMeters = lengthKm * 1000;
+
+            let mainDistance;
+
+            if (lengthKm < 1) {
+                mainDistance = `${lengthMeters.toFixed(0)} m`;
+            } else {
+                mainDistance = `${lengthKm.toFixed(2)} km`;
+            }
 
             if (popupRef.current) popupRef.current.remove();
-            const html = `
 
-            <b>${length.toFixed(2)} km</b>
-            `
-            const location = pointsRef.current[pointsRef.current.length - 1]
-            // const location = e.lngLat;
-            popupRef.current = new maplibregl.Popup()
-                //console.log()
+            const html = `
+                <div class="measure-popup">
+                    <div class="measure-title">Distance</div>
+                    <div class="measure-main">${mainDistance}</div>
+                    <div class="measure-sub">${lengthMiles.toFixed(2)} miles</div>
+                </div>
+            `;
+
+            const location = pointsRef.current[pointsRef.current.length - 1];
+
+            popupRef.current = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            })
                 .setLngLat(location)
                 .setHTML(html)
                 .addTo(map);
@@ -119,6 +127,7 @@ export const useMeasureTool = (map, isLoaded, measureMode) => {
     };
 
     const clearMeasure = () => {
+
         pointsRef.current = [];
 
         if (popupRef.current) popupRef.current.remove();
