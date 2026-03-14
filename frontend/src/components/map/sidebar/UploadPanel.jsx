@@ -3,13 +3,14 @@ import { createAOI, fetchAOIData } from "../../../api/aoi";
 
 const UploadPanel = ({ userId, setDatasets }) => {
     const [showForm, setShowForm] = useState(false);
+    const [projectName, setProjectName] = useState("");
     const [aoiFiles, setAoiFiles] = useState([]);
     const [extraFiles, setExtraFiles] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
     const [success, setSuccess] = useState(false);
-    
 
     const resetForm = () => {
+        setProjectName("");
         setAoiFiles([]);
         setExtraFiles([]);
         setShowForm(false);
@@ -26,6 +27,12 @@ const UploadPanel = ({ userId, setDatasets }) => {
     };
 
     const handleUpload = async () => {
+
+        if (!projectName.trim()) {
+            alert("Project name is required");
+            return;
+        }
+
         if (!aoiFiles.length) {
             alert("AOI files are required (.shp + .dbf + .shx)");
             return;
@@ -40,8 +47,8 @@ const UploadPanel = ({ userId, setDatasets }) => {
         setSuccess(false);
 
         try {
-            const result = await createAOI(userId, aoiFiles, extraFiles);
-            const newAoiId = result.aoi_id;
+            const result = await createAOI(userId, projectName, aoiFiles, extraFiles);
+            const newAoiId = result.project_id;
 
             const response = await fetchAOIData(userId, newAoiId);
 
@@ -54,6 +61,7 @@ const UploadPanel = ({ userId, setDatasets }) => {
                 ...prev,
                 {
                     aoiId: newAoiId,
+                    projectName: projectName,
                     layers: layersWithVisibility
                 }
             ]);
@@ -87,6 +95,18 @@ const UploadPanel = ({ userId, setDatasets }) => {
                 <div className="aoi-form">
 
                     <h4>Create New AOI</h4>
+
+                    <div className="form-section">
+                        <label>Project Name</label>
+
+                        <input
+                            type="text"
+                            placeholder="Enter project name"
+                            value={projectName}
+                            onChange={(e) => setProjectName(e.target.value)}
+                            disabled={isUploading}
+                        />
+                    </div>
 
                     <div className="form-section">
                         <label>AOI Shapefile</label>

@@ -1,8 +1,16 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Form
+from models.user import User
+from core.auth import get_current_user
 from uuid import uuid4
 import os
 import pandas as pd
 import geopandas as gpd
+
+from sqlalchemy.orm import Session
+from db.session import get_db
+from models.project import Project
+from models.dataset import Dataset
+from models.user import UserRole
 
 router = APIRouter()
 
@@ -41,17 +49,29 @@ def list_files(path: str, extension: str):
     ]
 
 ############################### NEW ROUTES ###############################
-@router.post("/aois/{user_id}")
-async def create_aoi(
-    user_id: str,
+@router.post("/")
+async def create_project(
+    project_name: str = Form(...),
     aoi_file: list[UploadFile] = File(...),
-    extra_files: list[UploadFile] = File(default=[])
+    extra_files: list[UploadFile] = File(default=[]),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    if not aoi_file:
-        raise HTTPException(status_code=400, detail="AOI files required")
 
-    # 🔹 Validação extensões
+    if current_user.role != UserRole.admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins can create projects"
+        )
+
+    if not aoi_file:
+        raise HTTPException(
+            status_code=400,
+            detail="AOI files required"
+        )
+
     required_ext = {".shp", ".dbf", ".shx"}
+
     uploaded_ext = {
         os.path.splitext(f.filename.lower())[1]
         for f in aoi_file
@@ -60,21 +80,20 @@ async def create_aoi(
     if not required_ext.issubset(uploaded_ext):
         raise HTTPException(
             status_code=400,
-            detail="Shapefile must include .shp, .dbf and .shx"
+            detail="Shapefile must include .shp .dbf .shx"
         )
 
-    aoi_id = str(uuid4())
+    project_uuid = str(uuid4())
+    project_path = os.path.join(STORAGE_ROOT, project_uuid)
 
-    aoi_path = os.path.join(
-        STORAGE_ROOT,
-        f"user_{user_id}",
-        f"aoi_{aoi_id}"
-    )
+    area_path = os.path.join(project_path, "area")
+    dataset_path = os.path.join(project_path, "datasets")
 
-    os.makedirs(aoi_path, exist_ok=True)
+    os.makedirs(area_path, exist_ok=True)
+    os.makedirs(dataset_path, exist_ok=True)
 
     for file in aoi_file:
-        file_path = os.path.join(aoi_path, file.filename)
+        file_path = os.path.join(area_path, file.filename)
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
 
@@ -82,20 +101,55 @@ async def create_aoi(
         f.filename for f in aoi_file
         if f.filename.lower().endswith(".shp")
     )
+    shp_path = os.path.join(area_path, shp_name)
 
     try:
-        gpd.read_file(os.path.join(aoi_path, shp_name))
+        gdf = gpd.read_file(shp_path)
+        gdf = gdf.to_crs(MAP_CRS)
+
     except Exception:
-        raise HTTPException(status_code=400, detail="Invalid shapefile")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid shapefile"
+        )
+
+    if gdf.empty:
+        raise HTTPException(
+            status_code=400,
+            detail="Shapefile contains no features"
+        )
+
+    geom = gdf.unary_union
+
+    project = Project(
+        name=project_name,
+        user_id=current_user.id,
+        geom=geom
+    )
+
+    db.add(project)
+    db.commit()
+    db.refresh(project)
 
     for file in extra_files:
-        file_path = os.path.join(aoi_path, file.filename)
+        file_path = os.path.join(dataset_path, file.filename)
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
+        dataset = Dataset(
+            name=file.filename,
+            file_path=file_path,
+            file_type="csv",
+            project_id=project.id
+        )
+        db.add(dataset)
+    db.commit()
 
     return {
         "status": "success",
-        "aoi_id": aoi_id
+        "data": {
+            "project_id": str(project.public_id),
+            "name": project.name
+        }
     }
 
 @router.get("/aois/{user_id}")

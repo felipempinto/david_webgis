@@ -18,7 +18,7 @@ class Dataset(Base):
     name =          Column(String, nullable=False)
     file_path =     Column(String, nullable=False)
     file_type =     Column(String)  # csv, geojson, etc
-    metadata =      Column(JSON)  # opcional
+    meta =          Column(JSON)  # ou dataset_metadata
     project_id =    Column(Integer, ForeignKey("projects.id"), nullable=False)
     created_at =    Column(DateTime, server_default=func.now())
 

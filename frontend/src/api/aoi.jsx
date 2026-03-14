@@ -1,11 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 
-/* =========================
-    LISTAR AOIs DO USUÁRIO
-========================= */
 export const fetchUserAOIs = async (userId) => {
-    // const res = await fetch(`${API_URL}/aois/${userId}`);
     const res = await fetch(`${API_URL}/projects/${userId}`);
 
     if (!res.ok) {
@@ -17,14 +13,9 @@ export const fetchUserAOIs = async (userId) => {
     return result?.data?.projects ?? [];
 };
 
-
-/* =========================
-    BUSCAR DADOS DE UMA AOI
-========================= */
 export const fetchAOIData = async (userId, aoiId) => {
     const res = await fetch(
         `${API_URL}/projects/${userId}/${aoiId}`
-        // `${API_URL}/projects/${userId}/${aoiId}`
     );
 
     if (!res.ok) {
@@ -39,25 +30,20 @@ export const fetchAOIData = async (userId, aoiId) => {
     })) ?? [];
 };
 
-
-/* =========================
-    CRIAR NOVA AOI
-    (AOI obrigatório + extras opcionais)
-========================= */
-export const createAOI = async (userId, aoiFiles, extraFiles = []) => {
+export const createAOI = async (userId, projectName, aoiFiles, extraFiles = []) => {
     const formData = new FormData();
 
-    // 🔹 Shapefile principal
+    formData.append("project_name", projectName);
+
     aoiFiles.forEach(file => {
         formData.append("aoi_file", file);
     });
 
-    // 🔹 Extras opcionais
     extraFiles.forEach(file => {
         formData.append("extra_files", file);
     });
 
-    const res = await fetch(`${API_URL}/aois/${userId}`, {
+    const res = await fetch(`${API_URL}/projects/${userId}`, {
         method: "POST",
         body: formData
     });
@@ -69,10 +55,6 @@ export const createAOI = async (userId, aoiFiles, extraFiles = []) => {
     return await res.json();
 };
 
-
-/* =========================
-    ADICIONAR DADOS EXTRAS
-========================= */
 export const addAOIExtras = async (userId, aoiId, files) => {
     const formData = new FormData();
 
@@ -81,7 +63,7 @@ export const addAOIExtras = async (userId, aoiId, files) => {
     });
 
     const res = await fetch(
-        `${API_URL}/aois/${userId}/${aoiId}/extras`,
+        `${API_URL}/projects/${userId}/${aoiId}/extras`,
         {
             method: "POST",
             body: formData
@@ -96,12 +78,9 @@ export const addAOIExtras = async (userId, aoiId, files) => {
 };
 
 
-/* =========================
-    DELETAR DADO EXTRA
-========================= */
 export const deleteAOIExtra = async (userId, aoiId, filename) => {
     const res = await fetch(
-        `${API_URL}/aois/${userId}/${aoiId}/extras/${filename}`,
+        `${API_URL}/projects/${userId}/${aoiId}/datasets/${filename}`,
         {
             method: "DELETE"
         }
@@ -117,7 +96,7 @@ export const deleteAOIExtra = async (userId, aoiId, filename) => {
 
 export const handleDeleteAOI = async (userId,aoiId,setDatasets) => {
     try {
-        await fetch(`${API_URL}/aois/${userId}/${aoiId}`, {
+        await fetch(`${API_URL}/projects/${userId}/${aoiId}`, {
             method: "DELETE"
         });
 

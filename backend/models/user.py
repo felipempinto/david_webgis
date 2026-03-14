@@ -19,6 +19,7 @@ class User(Base):
     id =            Column(Integer, primary_key=True)
     public_id =     Column(UUID(as_uuid=True),unique=True, nullable=False, server_default=text("gen_random_uuid()"))
     email =         Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
     role =          Column(Enum(UserRole), nullable=False, default=UserRole.viewer)
     created_at =    Column(DateTime, server_default=func.now())
 
