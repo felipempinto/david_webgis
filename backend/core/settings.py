@@ -14,9 +14,6 @@ DATABASE_URL = (
     f"postgresql+psycopg2://{PG_USER}:{PG_PASS}@{PG_HOST}:{PG_PORT}/{PG_DB}"
 )
 
-print("DATABASE_URL",DATABASE_URL)
-print("#"*100)
-
 class Settings:
     DATABASE_URL = DATABASE_URL
 
