@@ -1,28 +1,47 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 
-export const fetchUserAOIs = async (userId) => {
-    const res = await fetch(`${API_URL}/projects/${userId}`);
+// export const fetchUserAOIs = async (userId) => {
+//     const res = await fetch(`${API_URL}/projects/${userId}`);
 
-    if (!res.ok) {
-        throw new Error("Failed to list AOIs");
-    }
+//     if (!res.ok) {
+//         throw new Error("Failed to list AOIs");
+//     }
 
-    const result = await res.json();
+//     const result = await res.json();
+
+//     return result?.data?.projects ?? [];
+// };
+
+// export const fetchAOIData = async (userId, aoiId) => {
+//     const res = await fetch(
+//         `${API_URL}/projects/${userId}/${aoiId}`
+//     );
+
+//     if (!res.ok) {
+//         throw new Error("Failed to load AOI");
+//     }
+
+//     const result = await res.json();
+
+//     return result?.data?.layers?.map(layer => ({
+//         ...layer,
+//         visible: true
+//     })) ?? [];
+// };
+
+import { apiFetch } from "./client";
+
+export const fetchUserAOIs = async () => {
+
+    const result = await apiFetch("/projects");
 
     return result?.data?.projects ?? [];
 };
 
-export const fetchAOIData = async (userId, aoiId) => {
-    const res = await fetch(
-        `${API_URL}/projects/${userId}/${aoiId}`
-    );
+export const fetchAOIData = async (projectId) => {
 
-    if (!res.ok) {
-        throw new Error("Failed to load AOI");
-    }
-
-    const result = await res.json();
+    const result = await apiFetch(`/projects/${projectId}`);
 
     return result?.data?.layers?.map(layer => ({
         ...layer,
@@ -30,7 +49,8 @@ export const fetchAOIData = async (userId, aoiId) => {
     })) ?? [];
 };
 
-export const createAOI = async (userId, projectName, aoiFiles, extraFiles = []) => {
+export const createAOI = async (projectName, aoiFiles, extraFiles = []) => {
+
     const formData = new FormData();
 
     formData.append("project_name", projectName);
@@ -43,8 +63,13 @@ export const createAOI = async (userId, projectName, aoiFiles, extraFiles = []) 
         formData.append("extra_files", file);
     });
 
-    const res = await fetch(`${API_URL}/projects/${userId}`, {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${API_URL}/projects`, {
         method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
         body: formData
     });
 
@@ -52,8 +77,32 @@ export const createAOI = async (userId, projectName, aoiFiles, extraFiles = []) 
         throw new Error("Upload failed");
     }
 
-    return await res.json();
+    return res.json();
 };
+// export const createAOI = async (userId, projectName, aoiFiles, extraFiles = []) => {
+//     const formData = new FormData();
+
+//     formData.append("project_name", projectName);
+
+//     aoiFiles.forEach(file => {
+//         formData.append("aoi_file", file);
+//     });
+
+//     extraFiles.forEach(file => {
+//         formData.append("extra_files", file);
+//     });
+
+//     const res = await fetch(`${API_URL}/projects/${userId}`, {
+//         method: "POST",
+//         body: formData
+//     });
+
+//     if (!res.ok) {
+//         throw new Error("Upload failed");
+//     }
+
+//     return await res.json();
+// };
 
 export const addAOIExtras = async (userId, aoiId, files) => {
     const formData = new FormData();

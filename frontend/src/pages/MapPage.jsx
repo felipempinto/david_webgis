@@ -11,7 +11,8 @@ const MapPage = () => {
     useEffect(() => {
         const load = async () => {
             try {
-                const aoiIds = await fetchUserAOIs(FAKE_USER_ID);
+                // const aoiIds = await fetchUserAOIs(FAKE_USER_ID);
+                const aoiIds = await fetchUserAOIs();
 
                 const allAOIs = [];
 

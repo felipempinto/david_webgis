@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
+from models.user import User
+from core.auth import get_current_user
 from uuid import uuid4
 import os
 import pandas as pd
@@ -69,11 +71,18 @@ def get_project_path(user_id, project_id):
 # -------------------------------------------------------
 @router.post("/")
 async def create_project(
-        user_id: str,
-        project_name: str = Form(...),
-        aoi_file: list[UploadFile] = File(...),
-        extra_files: list[UploadFile] = File(default=[])
-    ):
+    project_name: str = Form(...),
+    aoi_file: list[UploadFile] = File(...),
+    extra_files: list[UploadFile] = File(default=[]),
+    current_user: User = Depends(get_current_user)
+):
+    user_id = current_user.public_id
+# async def create_project(
+#         user_id: str,
+#         project_name: str = Form(...),
+#         aoi_file: list[UploadFile] = File(...),
+#         extra_files: list[UploadFile] = File(default=[])
+#     ):
 
     if not aoi_file:
         raise HTTPException(400, "AOI files required")
@@ -134,7 +143,12 @@ async def create_project(
 # -------------------------------------------------------
 
 @router.get("/")
-def list_user_projects(user_id: str):
+def list_user_projects(
+    current_user: User = Depends(get_current_user)
+):
+
+    user_id = current_user.public_id
+
     user_path = os.path.join(STORAGE_ROOT, f"user_{user_id}")
 
     if not os.path.exists(user_path):
@@ -143,27 +157,55 @@ def list_user_projects(user_id: str):
     projects = []
 
     for folder in os.listdir(user_path):
-
         if folder.startswith("project_"):
-            projects.append(
-                folder.replace("project_", "")
-            )
+            projects.append(folder.replace("project_", ""))
 
-    print(projects)
     return {
         "status": "success",
         "data": {
             "projects": projects
         }
     }
+# @router.get("/")
+# def list_user_projects(user_id: str):
+#     user_path = os.path.join(STORAGE_ROOT, f"user_{user_id}")
+
+#     if not os.path.exists(user_path):
+#         return {"status": "success", "data": {"projects": []}}
+
+#     projects = []
+
+#     for folder in os.listdir(user_path):
+
+#         if folder.startswith("project_"):
+#             projects.append(
+#                 folder.replace("project_", "")
+#             )
+
+#     print(projects)
+#     return {
+#         "status": "success",
+#         "data": {
+#             "projects": projects
+#         }
+#     }
 
 
 # -------------------------------------------------------
 # GET PROJECT DATA
 # -------------------------------------------------------
 
+# @router.get("/{project_id}")
+# def get_project_data(user_id: str, project_id: str):
+
+#     project_path = get_project_path(user_id, project_id)
 @router.get("/{project_id}")
-def get_project_data(user_id: str, project_id: str):
+def get_project_data(
+    project_id: str,
+    current_user: User = Depends(get_current_user)
+):
+
+    user_id = current_user.public_id
 
     project_path = get_project_path(user_id, project_id)
 

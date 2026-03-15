@@ -1,19 +1,17 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { register } from "../api/auth";
 import "./auth.css";
 
-const LoginPage = () => {
-    const { login } = useAuth();
+const RegisterPage = () => {
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("");
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await login(email, password);
-            navigate("/map");
+            await register(email,password);
+            alert("Account created");
+            window.location.href="/login";
         } catch(err){
             alert(err.message);
         }
@@ -22,7 +20,7 @@ const LoginPage = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2>Login</h2>
+                <h2>Create Account</h2>
                 <form onSubmit={handleSubmit}>
                     <input
                         type="email"
@@ -37,7 +35,7 @@ const LoginPage = () => {
                         onChange={(e)=>setPassword(e.target.value)}
                     />
                     <button type="submit">
-                        Login
+                        Register
                     </button>
                 </form>
             </div>
@@ -45,4 +43,4 @@ const LoginPage = () => {
     );
 };
 
-export default LoginPage;
+export default RegisterPage;
