@@ -5,7 +5,6 @@ import "./Sidebar.css";
 const Sidebar = ({
     datasets,
     setDatasets,
-    userId,
     setSelectedTable
 }) => {
     return (
@@ -15,12 +14,10 @@ const Sidebar = ({
             <DatasetList
                 datasets={datasets}
                 setDatasets={setDatasets}
-                userId={userId}
                 setSelectedTable={setSelectedTable}
             />
 
             <UploadPanel
-                userId={userId}
                 setDatasets={setDatasets}
             />
         </div>

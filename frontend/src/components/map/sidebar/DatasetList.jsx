@@ -7,18 +7,15 @@ import {
 } from "../../../api/aoi";
 
 
-const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
+const DatasetList = ({ datasets, setDatasets, setSelectedTable }) => {
 
     const [uploadingFor, setUploadingFor] = useState(null);
 
-    const handleAddCSV = async (userId, aoiId, files) => {
+    const handleAddCSV = async ( aoiId, files) => {
         try {
             setUploadingFor(aoiId);
-
-            await addAOIExtras(userId, aoiId, files);
-
-            const result = await fetchAOIData(userId, aoiId);
-
+            await addAOIExtras( aoiId, files);
+            const result = await fetchAOIData( aoiId);
             const updatedLayers = result.map(layer => ({
                 ...layer,
                 visible: true
@@ -61,8 +58,8 @@ const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
 
     const deleteLayer = async (aoiId, filename) => {
         try {
-            await deleteAOIExtra(userId, aoiId, filename);
-            const updatedLayers = await fetchAOIData(userId, aoiId);
+            await deleteAOIExtra(aoiId, filename);
+            const updatedLayers = await fetchAOIData(aoiId);
 
             setDatasets(prev =>
                 prev.map(aoi =>
@@ -112,7 +109,7 @@ const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
                         <button
                             className="delete-aoi-btn"
                             // disabled={!canDeleteAOI}
-                            onClick={() => handleDeleteAOI(userId, aoi.aoiId, setDatasets)}
+                            onClick={() => handleDeleteAOI( aoi.aoiId, setDatasets)}
                         >
                             🗑 Delete AOI
                         </button>
@@ -128,7 +125,7 @@ const DatasetList = ({ datasets, setDatasets, userId, setSelectedTable }) => {
                                     const files = [...e.target.files];
                                     if (!files.length) return;
 
-                                    handleAddCSV(userId, aoi.aoiId, files);
+                                    handleAddCSV(aoi.aoiId, files);
                                 }}
                             />
 

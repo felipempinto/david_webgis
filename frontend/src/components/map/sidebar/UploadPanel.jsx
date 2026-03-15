@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createAOI, fetchAOIData } from "../../../api/aoi";
 
-const UploadPanel = ({ userId, setDatasets }) => {
+const UploadPanel = ({ setDatasets }) => {
     const [showForm, setShowForm] = useState(false);
     const [projectName, setProjectName] = useState("");
     const [aoiFiles, setAoiFiles] = useState([]);
@@ -47,24 +47,33 @@ const UploadPanel = ({ userId, setDatasets }) => {
         setSuccess(false);
 
         try {
-            const result = await createAOI(userId, projectName, aoiFiles, extraFiles);
-            const newAoiId = result.project_id;
+            const result = await createAOI(projectName, aoiFiles, extraFiles);
+            const newProjectId = result.data.project_id;
 
-            const response = await fetchAOIData(userId, newAoiId);
+            const response = await fetchAOIData(newProjectId);
 
             const layersWithVisibility = response.map(layer => ({
                 ...layer,
                 visible: true
             }));
-
+            
             setDatasets(prev => [
                 ...prev,
                 {
-                    aoiId: newAoiId,
+                    aoiId: newProjectId,
                     projectName: projectName,
                     layers: layersWithVisibility
                 }
             ]);
+
+            // setDatasets(prev => [
+            //     ...prev,
+            //     {
+            //         aoiId: newAoiId,
+            //         projectName: projectName,
+            //         layers: layersWithVisibility
+            //     }
+            // ]);
 
             setSuccess(true);
             setTimeout(() => setSuccess(false), 1000);

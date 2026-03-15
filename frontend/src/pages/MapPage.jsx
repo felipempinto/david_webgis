@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
 import MapContainer from "../components/map/MapContainer";
 import "./MapPage.css"
-const FAKE_USER_ID = "admin";
 
 const MapPage = () => {
     const [datasets, setDatasets] = useState([]);
@@ -11,17 +10,10 @@ const MapPage = () => {
     useEffect(() => {
         const load = async () => {
             try {
-                // const aoiIds = await fetchUserAOIs(FAKE_USER_ID);
                 const aoiIds = await fetchUserAOIs();
-
                 const allAOIs = [];
-
                 for (const aoiId of aoiIds) {
-                    const layers = await fetchAOIData(
-                        FAKE_USER_ID,
-                        aoiId
-                    );
-
+                    const layers = await fetchAOIData(aoiId);
                     allAOIs.push({
                         aoiId,
                         layers: layers.map(layer => ({
@@ -32,7 +24,6 @@ const MapPage = () => {
                 }
 
                 setDatasets(allAOIs);
-
             } catch (err) {
                 console.error("Failed to load AOIs", err);
             }
@@ -48,7 +39,6 @@ const MapPage = () => {
                 setDatasets={setDatasets}
                 selectedTable={selectedTable}
                 setSelectedTable={setSelectedTable}
-                userId={FAKE_USER_ID}
             />
 
         </div>

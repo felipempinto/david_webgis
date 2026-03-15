@@ -11,8 +11,7 @@ const MapContainer = ({
     datasets,
     setDatasets,
     selectedTable,
-    setSelectedTable,
-    userId
+    setSelectedTable
 }) => {
     const containerRef = useRef(null);
     const { map, isLoaded } = useMapInstance(containerRef);
@@ -50,7 +49,6 @@ const MapContainer = ({
             <Sidebar
                 datasets={datasets}
                 setDatasets={setDatasets}
-                userId={userId}
                 setSelectedTable={setSelectedTable}
             />
 
