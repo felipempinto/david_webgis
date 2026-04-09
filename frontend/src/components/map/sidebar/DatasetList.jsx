@@ -56,9 +56,12 @@ const DatasetList = ({ datasets, setDatasets, setSelectedTable }) => {
         );
     };
 
-    const deleteLayer = async (aoiId, filename) => {
+    // const deleteLayer = async (aoiId, filename) => {
+    const deleteLayer = async (aoiId, public_id) => {
         try {
-            await deleteAOIExtra(aoiId, filename);
+            // console.log(aoiId,filename)
+            // await deleteAOIExtra(aoiId, filename);
+            await deleteAOIExtra(public_id);
             const updatedLayers = await fetchAOIData(aoiId);
 
             setDatasets(prev =>
@@ -89,9 +92,6 @@ const DatasetList = ({ datasets, setDatasets, setSelectedTable }) => {
         <div className="dataset-list">
 
             {datasets.map(aoi => {
-                console.log(aoi)
-
-
                 const shapefile = aoi.layers.find(
                     l => l.source === "shapefile"
                 );
@@ -214,7 +214,8 @@ const DatasetList = ({ datasets, setDatasets, setSelectedTable }) => {
                                     onClick={() =>
                                         deleteLayer(
                                             aoi.aoiId,
-                                            csv.name
+                                            csv.public_id
+                                            // csv.name
                                         )
                                     }
                                 >

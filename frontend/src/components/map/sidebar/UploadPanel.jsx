@@ -48,7 +48,7 @@ const UploadPanel = ({ setDatasets }) => {
 
         try {
             const result = await createAOI(projectName, aoiFiles, extraFiles);
-            const newProjectId = result.data.project_id;
+            const newProjectId = result.project_id;
 
             const response = await fetchAOIData(newProjectId);
 

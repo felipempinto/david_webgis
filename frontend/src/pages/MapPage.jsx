@@ -22,7 +22,6 @@ const MapPage = () => {
                         }))
                     });
                 }
-
                 setDatasets(allAOIs);
             } catch (err) {
                 console.error("Failed to load AOIs", err);

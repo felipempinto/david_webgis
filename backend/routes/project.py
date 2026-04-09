@@ -7,6 +7,7 @@ import pandas as pd
 import geopandas as gpd
 
 from shapely import force_2d
+from geoalchemy2.shape import to_shape
 from sqlalchemy.orm import Session
 from db.session import get_db
 
@@ -195,6 +196,13 @@ def list_user_projects(
 # -------------------------------------------------------
 # GET PROJECT DATA
 # -------------------------------------------------------
+
+
+def geom_to_geojson(geom):
+    shapely_geom = to_shape(geom)
+    gdf = gpd.GeoDataFrame(geometry=[shapely_geom], crs=MAP_CRS)
+    return gdf.__geo_interface__
+
 @router.get("/{project_id}")
 def get_project_data(
     project_id: str,
@@ -211,23 +219,32 @@ def get_project_data(
 
     if not project:
         raise HTTPException(404, "Project not found")
-
     layers = []
     errors = []
 
+    aoi_geojson = geom_to_geojson(project.geom)
+
+    layers.append({
+        "name": "AOI",
+        "public_id": f"aoi-{project.public_id}",
+        "type": "polygon",
+        "source": "aoi",
+        "geojson": aoi_geojson,
+        "created_at": None
+    })
+
     for dataset in project.datasets:
-
         try:
-
             if dataset.file_type == "csv":
-
                 geojson = csv_to_geojson(dataset.file_path)
-
                 layers.append({
                     "name": dataset.name,
+                    "public_id":dataset.public_id,
+                    "meta":dataset.meta,
                     "source": "csv",
                     "type": "point",
-                    "geojson": geojson
+                    "geojson": geojson,
+                    "created_at":dataset.created_at
                 })
 
         except RuntimeError as e:
@@ -300,24 +317,37 @@ async def add_files_to_project(
 # DELETE DATASET
 # -------------------------------------------------------
 
-@router.delete("/{project_id}/datasets/{filename}")
+# @router.delete("/{project_id}/datasets/{filename}")
+@router.delete("/datasets/{public_id}")
 def delete_file_from_project(
-    user_id: str,
-    project_id: str,
-    filename: str
+    public_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
 
-    if "/" in filename or "\\" in filename:
-        raise HTTPException(400, "Invalid filename")
-
-    dataset_path = os.path.join(
-        get_project_path(user_id, project_id),
-        "datasets"
+    dataset = (
+        db.query(Dataset)
+        .filter(Dataset.public_id == public_id)
+        .first()
     )
+    if not dataset:
+        raise HTTPException(404, "Dataset not found")
 
-    file_path = os.path.join(dataset_path, filename)
+    project = (
+        db.query(Project)
+        .filter(
+            Project.id == dataset.project_id,
+            Project.user_id == current_user.id
+        )
+        .first()
+    )
+    if not project:
+        raise HTTPException(403, "Not authorized")
+        
+    file_path = dataset.file_path
 
     if not os.path.exists(file_path):
+        print("não achou o faio",file_path)
         raise HTTPException(404, "File not found")
 
     os.remove(file_path)

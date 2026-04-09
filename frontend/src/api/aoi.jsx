@@ -62,11 +62,18 @@ export const addAOIExtras = async (userId, aoiId, files) => {
 };
 
 
-export const deleteAOIExtra = async (userId, aoiId, filename) => {
+// export const deleteAOIExtra = async (aoiId, filename) => {
+export const deleteAOIExtra = async (publicId) => {
+    const token = localStorage.getItem("token");
+
     const res = await fetch(
-        `${API_URL}/projects/${userId}/${aoiId}/datasets/${filename}`,
+        // `${API_URL}/projects/${aoiId}/datasets/${filename}`,
+        `${API_URL}/projects/datasets/${publicId}`,
         {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
         }
     );
 
@@ -78,10 +85,16 @@ export const deleteAOIExtra = async (userId, aoiId, filename) => {
 };
 
 
-export const handleDeleteAOI = async (userId,aoiId,setDatasets) => {
+export const handleDeleteAOI = async (aoiId,setDatasets) => {
+    const token = localStorage.getItem("token");
     try {
-        await fetch(`${API_URL}/projects/${userId}/${aoiId}`, {
-            method: "DELETE"
+        await fetch(
+            `${API_URL}/projects/${aoiId}`
+            , {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
         });
 
         setDatasets(prev =>

@@ -13,7 +13,6 @@ export const useMapLayers = (map, isLoaded, datasets) => {
         const activeSourceIds = new Set();
 
         datasets.forEach(aoi => {
-
             aoi.layers.forEach(layer => {
 
                 const sourceId = `source-${aoi.aoiId}-${layer.name}`;
