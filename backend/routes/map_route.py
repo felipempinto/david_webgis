@@ -173,17 +173,22 @@ def list_user_aois(user_id: str):
         }
     }
 
-@router.post("/aois/{user_id}/{aoi_id}/extras")
+# @router.post("/aois/{user_id}/{aoi_id}/extras")
+@router.post("/{aoi_id}/extras")
 async def add_extra_files(
-    user_id: str,
     aoi_id: str,
-    files: list[UploadFile] = File(...)
+    files: list[UploadFile] = File(...),
+    current_user: User = Depends(get_current_user)
 ):
     aoi_path = os.path.join(
         STORAGE_ROOT,
-        f"user_{user_id}",
-        f"aoi_{aoi_id}"
+        f"user_{current_user.id}",
+        f"project_{aoi_id}"
     )
+
+    print(aoi_path)
+
+    # '/user_41d3d600-0d18-48bc-b46e-35823f23a632/project_71dcc6ff-4fc2-4109-b48f-dfba34627468/area/AOI_Limit.shp'
 
     if not os.path.exists(aoi_path):
         raise HTTPException(status_code=404, detail="AOI not found")

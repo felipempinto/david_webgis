@@ -7,12 +7,25 @@ export const fetchUserAOIs = async () => {
 };
 
 export const fetchAOIData = async (projectId) => {
+    if (!projectId || typeof projectId !== "string") {
+        throw new Error(`Invalid projectId: ${JSON.stringify(projectId)}`);
+    }
+
     const result = await apiFetch(`/projects/${projectId}`);
+
     return result?.data?.layers?.map(layer => ({
         ...layer,
         visible: true
     })) ?? [];
 };
+// export const fetchAOIData = async (projectId) => {
+//     console.log(projectId)
+//     const result = await apiFetch(`/projects/${projectId}`);
+//     return result?.data?.layers?.map(layer => ({
+//         ...layer,
+//         visible: true
+//     })) ?? [];
+// };
 
 export const createAOI = async (projectName, aoiFiles, extraFiles = []) => {
     const formData = new FormData();
@@ -39,27 +52,49 @@ export const createAOI = async (projectName, aoiFiles, extraFiles = []) => {
     return res.json();
 };
 
-export const addAOIExtras = async (userId, aoiId, files) => {
+export const addAOIExtras = async (aoiId, files) => {
     const formData = new FormData();
-
     files.forEach(file => {
         formData.append("files", file);
     });
-
+    const token = localStorage.getItem("token");
     const res = await fetch(
-        `${API_URL}/projects/${userId}/${aoiId}/extras`,
+        `${API_URL}/projects/${aoiId}/extras`,
         {
             method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             body: formData
         }
     );
-
     if (!res.ok) {
         throw new Error("Failed to upload extra files");
     }
-
     return await res.json();
 };
+
+// export const addAOIExtras = async (aoiId, files) => {
+//     const formData = new FormData();
+
+//     files.forEach(file => {
+//         formData.append("files", file);
+//     });
+
+//     const res = await fetch(
+//         `${API_URL}/projects/${aoiId}/extras`,
+//         {
+//             method: "POST",
+//             body: formData
+//         }
+//     );
+
+//     if (!res.ok) {
+//         throw new Error("Failed to upload extra files");
+//     }
+
+//     return await res.json();
+// };
 
 
 // export const deleteAOIExtra = async (aoiId, filename) => {
@@ -84,25 +119,48 @@ export const deleteAOIExtra = async (publicId) => {
     return await res.json();
 };
 
-
-export const handleDeleteAOI = async (aoiId,setDatasets) => {
+export const handleDeleteAOI = async (aoiId, setDatasets) => {
     const token = localStorage.getItem("token");
+
     try {
-        await fetch(
-            `${API_URL}/projects/${aoiId}`
-            , {
+        const res = await fetch(`${API_URL}/projects/${aoiId}`, {
             method: "DELETE",
             headers: {
-                "Authorization": `Bearer ${token}`
+                Authorization: `Bearer ${token}`
             }
         });
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.detail || "Failed to delete AOI");
+        }
 
         setDatasets(prev =>
             prev.filter(aoi => aoi.aoiId !== aoiId)
         );
-
     } catch (err) {
-        //TODO: tratar os erros aqui
-        alert(err);
+        alert(err.message || "Error deleting AOI");
     }
 };
+
+// export const handleDeleteAOI = async (aoiId,setDatasets) => {
+//     const token = localStorage.getItem("token");
+//     try {
+//         await fetch(
+//             `${API_URL}/projects/${aoiId}`
+//             , {
+//             method: "DELETE",
+//             headers: {
+//                 "Authorization": `Bearer ${token}`
+//             }
+//         });
+
+//         setDatasets(prev =>
+//             prev.filter(aoi => aoi.aoiId !== aoiId)
+//         );
+
+//     } catch (err) {
+//         //TODO: tratar os erros aqui
+//         alert(err);
+//     }
+// };

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import auth,  map_route, project 
+from routes import auth,  map_route, project
 
 from fastapi.middleware.cors import CORSMiddleware
 

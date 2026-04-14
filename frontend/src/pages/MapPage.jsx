@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
 import MapContainer from "../components/map/MapContainer";
-import "./MapPage.css"
+import "./MapPage.css";
 
 const MapPage = () => {
     const [datasets, setDatasets] = useState([]);
@@ -10,18 +10,22 @@ const MapPage = () => {
     useEffect(() => {
         const load = async () => {
             try {
-                const aoiIds = await fetchUserAOIs();
+                const projects = await fetchUserAOIs();
                 const allAOIs = [];
-                for (const aoiId of aoiIds) {
-                    const layers = await fetchAOIData(aoiId);
+
+                for (const project of projects) {
+                    const layers = await fetchAOIData(project.public_id);
+
                     allAOIs.push({
-                        aoiId,
+                        aoiId: project.public_id,
+                        name: project.name,
                         layers: layers.map(layer => ({
                             ...layer,
                             visible: true
                         }))
                     });
                 }
+
                 setDatasets(allAOIs);
             } catch (err) {
                 console.error("Failed to load AOIs", err);
@@ -39,9 +43,56 @@ const MapPage = () => {
                 selectedTable={selectedTable}
                 setSelectedTable={setSelectedTable}
             />
-
         </div>
     );
 };
 
 export default MapPage;
+// import { useEffect, useState } from "react";
+// import { fetchUserAOIs, fetchAOIData } from "../api/aoi";
+// import MapContainer from "../components/map/MapContainer";
+// import "./MapPage.css"
+
+// const MapPage = () => {
+//     const [datasets, setDatasets] = useState([]);
+//     const [selectedTable, setSelectedTable] = useState(null);
+
+//     useEffect(() => {
+//         const load = async () => {
+//             try {
+//                 const aoiIds = await fetchUserAOIs();
+//                 const allAOIs = [];
+//                 for (const aoiId of aoiIds) {
+                    
+//                     const layers = await fetchAOIData(aoiId);
+//                     allAOIs.push({
+//                         aoiId,
+//                         layers: layers.map(layer => ({
+//                             ...layer,
+//                             visible: true
+//                         }))
+//                     });
+//                 }
+//                 setDatasets(allAOIs);
+//             } catch (err) {
+//                 console.error("Failed to load AOIs", err);
+//             }
+//         };
+
+//         load();
+//     }, []);
+
+//     return (
+//         <div className="app-layout">
+//             <MapContainer
+//                 datasets={datasets}
+//                 setDatasets={setDatasets}
+//                 selectedTable={selectedTable}
+//                 setSelectedTable={setSelectedTable}
+//             />
+
+//         </div>
+//     );
+// };
+
+// export default MapPage;

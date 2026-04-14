@@ -14,7 +14,12 @@ const DatasetList = ({ datasets, setDatasets, setSelectedTable }) => {
     const handleAddCSV = async ( aoiId, files) => {
         try {
             setUploadingFor(aoiId);
-            await addAOIExtras( aoiId, files);
+            try {
+                await addAOIExtras(aoiId, files);
+            } catch (error) {
+                console.error("Erro ao enviar CSV:", error);
+                //Depois preciso pensar em usar de maneira inteligente.
+            }
             const result = await fetchAOIData( aoiId);
             const updatedLayers = result.map(layer => ({
                 ...layer,

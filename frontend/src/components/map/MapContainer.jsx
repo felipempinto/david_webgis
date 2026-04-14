@@ -5,6 +5,8 @@ import AttributeTable from "./sidebar/AttributeTable";
 import Sidebar from "../map/sidebar/Sidebar";
 import { useMeasureTool } from "./useMesureTool"
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 
 const MapContainer = ({ 
@@ -18,9 +20,21 @@ const MapContainer = ({
     const [measureMode, setMeasureMode] = useState(false);
     const { clearMeasure } = useMeasureTool(map, isLoaded, measureMode);
 
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
     return (
         <div className="map-container">
             <div className="map-tools">
+                <button
+                    type="button"
+                    onClick={() => {
+                        logout();
+                        navigate("/");
+                    }}
+                >
+                    Logout
+                </button>
 
                 <button
                     type="button"
